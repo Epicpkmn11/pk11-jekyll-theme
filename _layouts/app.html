@@ -1,0 +1,231 @@
+---
+layout: base
+---
+
+<main>
+	<a class="back-link" href=".">
+		<span class="btn btn-primary btn-back"><i class="fa fa-chevron-left" aria-hidden="true"></i> Back</span>
+	</a>
+
+	{% include modal.html %}
+
+	<div class="container-fluid">
+		<div class="row pt-5">
+			<div class="col-12 mw-50 main-content mx-auto">
+				<div class="row">
+					<div class="col-md-4 mb-3">
+						<div class="card">
+							{% if page.website %}<a href="{{ page.website }}">{% elsif page.source %}<a href="{{ page.source }}">{% endif %}
+								{% if page.image %}
+									<div class="card-header">
+										<img class="mx-auto d-block mw-100" src="{{ page.image }}" alt="{{ page.title }}">
+									</div>
+								{% else if page.icon %}
+									<div class="card-header">
+										<img class="mx-auto d-block mw-100" src="{{ page.icon }}" alt="{{ page.title }}">
+									</div>
+								{% endif %}
+								<div class="card-body">
+									<div>
+										<h4 class="card-title text-center {% if page.author %}mb-0{% endif %}">{{ page.title }}</h4>
+										{% if page.author %}
+											<small class="d-block text-center mb-3">{{ page.author }}</small>
+										{% endif %}
+										<p class="card-text">{{ page.description }}</p>
+									</div>
+								</div>
+							{% if page.website %}</a>{% elsif page.source %}</a>{% endif %}
+							<div class="card-footer">
+								<small class="text-muted">
+									System:
+									{% for system in page.systems %}
+										<a href="/{{ system | downcase }}">{{ system }}</a>{% if forloop.last == false %},{% endif %}
+									{% endfor %}
+									{% if page.categories %}
+										<br>
+										Categories:
+										{% for category in page.categories %}
+											<a href="/{{ page.collection }}/{{ category }}">{{ category }}</a>{% if forloop.last == false %},{% endif %}
+										{% endfor %}
+									{% endif %}
+									{% if page.created != "---" %}
+										<br>
+										Created: <time datetime="{{ page.created }}" title="{{ page.created | date: '%Y-%m-%d at %H:%M' }}">{{ page.created | date: "%Y-%m-%d" }}</time>
+									{% endif %}
+									{% if page.license_name %}
+										<br>
+										License: {{ page.license_name }}
+									{% endif %}
+								</small>
+							</div>
+						</div>
+						<div class="text-center pt-3">
+							{% if page.source %}
+								<a class="btn btn-primary m-1" href="{{ page.source }}">Source</a>
+							{% endif %}
+							{% if page.website %}
+								<a class="btn btn-primary m-1" href="{{ page.website }}">Website</a>
+							{% endif %}
+							{% if page.wiki %}
+								<a class="btn btn-primary m-1" href="{{ page.wiki }}">Wiki</a>
+							{% endif %}
+						</div>
+					</div>
+					<div class="col-md-8">
+						<div class="row">
+							<div class="col-12">
+								<h2>Downloads</h2>
+								{% for item in page.downloads %}
+									{% assign itemQR = nil %}
+									{% for qr in page.qr %}
+										{% if item[0] == qr[0] %}
+											{% assign itemQR = qr %}
+											{% break %}
+										{% endif %}
+									{% endfor %}
+									<span class="text-nowrap">
+										<a class="btn btn-primary m-1 {% if itemQR %}btn-with-qr{% endif %}" {% if item[1].size_str %}title="Size: {{ item[1].size_str }}"{% endif %} href="{{ item[1].url }}">Download {{ item[0] }}</a>
+										{% if itemQR %}
+											<a class="btn btn-primary qr-link btn-qr" href="{{ itemQR[1] }}" role="button" data-bs-toggle="modal" data-bs-target="#modal" data-name="{{ itemQR[0] }}" data-path="{{ itemQR[1] }}" aria-label="Show QR Code for {{ item[0] }}">
+												<i class="fa fa-qrcode" aria-hidden="true"></i>
+											</a>
+										{% endif %}
+									</span>
+								{% endfor %}
+								
+								{% if page.version and page.downloads %}
+									<br>
+									<small class="text-muted">
+										Version: {% if page.download_page %}<a href="{{ page.download_page }}">{% endif %}{{ page.version }}{% if page.download_page %}</a>{% endif %}
+										{% if page.update_notes %}
+											<button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal" data-name="{% if page.version_title %}{{ page.version_title }}{% else %}{{ page.version }}{% endif %}" data-content="{{ page.update_notes | escape }}">
+												Update notes
+											</button>
+										{% elsif page.version_title %}
+										- {{ page.version_title }}
+										{% endif %}
+										<br>
+										{% if page.updated != "---" %}
+											Last updated: <time datetime="{{ page.updated }}" title="{{ page.prerelease.updated | date: '%Y-%m-%d at %H:%M' }}">{{ page.updated | date: "%Y-%m-%d at %H:%M" }}</time>
+										{% endif %}
+									</small>
+								{% endif %}
+							</div>
+						</div>
+						{% if page.prerelease %}
+							<div class="row mt-3">
+								<div class="col-12">
+									<h3>Prereleases</h3>
+									{% for item in page.prerelease.downloads %}
+										{% assign itemQR = nil %}
+										{% for qr in page.prerelease.qr %}
+											{% if item[0] == qr[0] %}
+												{% assign itemQR = qr %}
+												{% break %}
+											{% endif %}
+										{% endfor %}
+										<span class="text-nowrap">
+											<a class="btn btn-secondary m-1 {% if itemQR %}btn-with-qr{% endif %}" {% if item[1].size_str %}title="Size: {{ item[1].size_str }} bytes"{% endif %} href="{{ item[1].url }}">Download {{ item[0] }}</a>
+											{% if itemQR %}
+												<a class="btn btn-secondary qr-link btn-qr" href="{{ itemQR[1] }}" role="button" data-bs-toggle="modal" data-bs-target="#modal" data-name="{{ itemQR[0] }}" data-path="{{ itemQR[1] }}" aria-label="Show QR Code for {{ item[0] }}">
+													<i class="fa fa-qrcode" aria-hidden="true"></i>
+												</a>
+											{% endif %}
+										</span>
+									{% endfor %}
+	
+									{% if page.prerelease.version %}
+										<br>
+										<small class="text-muted">
+											Version: {% if page.prerelease.download_page %}<a href="{{ page.prerelease.download_page }}">{% endif %}{{ page.prerelease.version }}{% if page.prerelease.download_page %}</a>{% endif %}
+											{% if page.prerelease.update_notes %}
+												<button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal" data-name="{% if page.prerelease.version_title %}{{ page.prerelease.version_title }}{% else %}{{ page.prerelease.version }}{% endif %}" data-content="{{ page.prerelease.update_notes | escape }}">
+													Update notes
+												</button>
+											{% endif %}
+											<br>
+											{% if page.prerelease.updated != "---" %}
+												Last updated: <time datetime="{{ page.prerelease.updated }}" title="{{ page.prerelease.updated | date: '%Y-%m-%d at %H:%M' }}">{{ page.prerelease.updated | date: "%Y-%m-%d at %H:%M" }}</time>
+											{% endif %}
+										</small>
+									{% endif %}
+								</div>
+							</div>
+						{% endif%}
+						{% if page.nightly %}
+							<div class="row mt-3">
+								<div class="col-12">
+									<h3><abbr title="Commit / beta builds, potentially unstable but have the latest updates">Nightlies</abbr></h3>
+									{% for item in page.nightly.downloads %}
+										{% assign itemQR = nil %}
+										{% for qr in page.nightly.qr %}
+											{% if item[0] == qr[0] %}
+												{% assign itemQR = qr %}
+												{% break %}
+											{% endif %}
+										{% endfor %}
+										<span class="text-nowrap">
+											<a class="btn btn-dark m-1 {% if itemQR %}btn-with-qr{% endif %}" {% if item[1].size_str %}title="Size: {{ item[1].size_str }} bytes"{% endif %} href="{{ item[1].url }}">Download {{ item[0] }}</a>
+											{% if itemQR %}
+												<a class="btn btn-dark qr-link btn-qr" href="{{ itemQR[1] }}" role="button" data-bs-toggle="modal" data-bs-target="#modal" data-name="{{ itemQR[0] }}" data-path="{{ itemQR[1] }}" aria-label="Show QR Code for {{ item[0] }}">
+													<i class="fa fa-qrcode" aria-hidden="true"></i>
+												</a>
+											{% endif %}
+										</span>
+									{% endfor %}
+	
+									{% if page.nightly.download_page %}
+										<br>
+										<small class="text-muted">
+											<a href="{{ page.nightly.download_page }}">Download page</a>
+										</small>
+									{% endif %}
+								</div>
+							</div>
+						{% endif%}
+						{% if content.size > 1 %}
+							<div class="row mt-3">
+								<div class="col-12">
+									<h2>Description</h2>
+									{{ content }}
+								</div>
+							</div>
+						{% endif %}
+						{% if page.screenshots.size > 0 %}
+							<div class="row mt-3">
+								<div class="col-12">
+									<h2>Screenshots</h2>
+									<div id="screenshotCarousel" class="carousel carousel-dark-when-light slide mb-3" data-bs-ride="carousel">
+										<ol class="carousel-indicators">
+											{% for ss in page.screenshots %}
+												<li data-bs-target="#screenshotCarousel" data-bs-slide-to="{{ forloop.index0 }}" class="{% if forloop.first %}active{% endif %}"></li>
+											{% endfor %}
+										</ol>
+										<div class="carousel-inner">
+											{% for ss in page.screenshots %}
+												<div class="carousel-item mt-2 mb-2 {% if forloop.first %}active{% endif %}">
+													<img src="{{ ss.url }}" class="d-block mx-auto" alt="{{ ss.description }}">
+													<div class="carousel-caption d-none d-md-block">
+														<h5 class="carousel-label">{{ ss.description }}</h5>
+													</div>
+												</div>
+											{% endfor %}
+										</div>
+										<a class="carousel-control-prev" href="#screenshotCarousel" role="button" data-bs-slide="prev">
+											<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+											<span class="visually-hidden">Previous</span>
+										</a>
+										<a class="carousel-control-next" href="#screenshotCarousel" role="button" data-bs-slide="next">
+											<span class="carousel-control-next-icon" aria-hidden="true"></span>
+											<span class="visually-hidden">Next</span>
+										</a>
+									</div>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</main>
